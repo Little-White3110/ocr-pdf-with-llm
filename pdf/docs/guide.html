@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF OCR Web - 使用指南</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6750A4;
+            --primary-light: #EADDFF;
+            --surface: #FFFBFE;
+            --surface-variant: #E7E0EC;
+            --on-surface: #1C1B1F;
+            --on-surface-variant: #49454F;
+            --outline: #79747E;
+            --outline-variant: #CAC4D0;
+        }
+        
+        [data-theme="dark"] {
+            --primary: #D0BCFF;
+            --primary-light: #381E72;
+            --surface: #1C1B1F;
+            --surface-variant: #49454F;
+            --on-surface: #E6E1E5;
+            --on-surface-variant: #CAC4D0;
+            --outline: #938F99;
+            --outline-variant: #49454F;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--surface);
+            color: var(--on-surface);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--outline-variant);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .logo .material-icons-round {
+            font-size: 28px;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: var(--on-surface);
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--surface-variant);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 48px 24px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--surface) 100%);
+            border-radius: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 16px;
+            color: var(--on-surface);
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: var(--on-surface-variant);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            padding: 8px 16px;
+            background-color: var(--surface-variant);
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--on-surface);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .nav a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        section {
+            margin-bottom: 48px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+        }
+        
+        h3 {
+            font-size: 18px;
+            margin: 24px 0 12px;
+            color: var(--primary);
+        }
+        
+        p {
+            margin-bottom: 16px;
+            color: var(--on-surface-variant);
+        }
+        
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: var(--on-surface-variant);
+        }
+        
+        .card {
+            background-color: var(--surface-variant);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 16px 0;
+        }
+        
+        .card h4 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card h4 .material-icons-round {
+            color: var(--primary);
+        }
+        
+        code {
+            background-color: var(--outline-variant);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+        }
+        
+        pre {
+            background-color: var(--outline-variant);
+            padding: 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .warning {
+            background-color: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 16px;
+            border-radius: 0 12px 12px 0;
+            margin: 16px 0;
+        }
+        
+        [data-theme="dark"] .warning {
+            background-color: #3E2723;
+        }
+        
+        .warning strong {
+            color: #FF9800;
+        }
+        
+        .tip {
+            background-color: #E8F5E9;
+            border-left: 4px solid #4CAF50;
+            padding: 16px;
+            border-radius: 0 12px 12px 0;
+            margin: 16px 0;
+        }
+        
+        [data-theme="dark"] .tip {
+            background-color: #1B5E20;
+        }
+        
+        .tip strong {
+            color: #4CAF50;
+        }
+        
+        .screenshot {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--outline-variant);
+            margin: 16px 0;
+        }
+        
+        .steps {
+            counter-reset: step;
+        }
+        
+        .step {
+            display: flex;
+            gap: 16px;
+            margin: 24px 0;
+            align-items: flex-start;
+        }
+        
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            min-width: 32px;
+            height: 32px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content h4 {
+            margin-bottom: 8px;
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid var(--outline-variant);
+            padding: 16px 0;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .faq-question .material-icons-round {
+            color: var(--primary);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 32px;
+            border-top: 1px solid var(--outline-variant);
+            margin-top: 48px;
+            color: var(--on-surface-variant);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .hero {
+                padding: 32px 16px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .nav {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span class="material-icons-round">picture_as_pdf</span>
+            <span>PDF OCR Web</span>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span class="material-icons-round" id="themeIcon">dark_mode</span>
+        </button>
+    </header>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>使用指南</h1>
+            <p>PDF OCR Web 是一个基于 Web 的 PDF OCR 处理工具，支持中文识别和大纲生成</p>
+        </div>
+        
+        <nav class="nav">
+            <a href="#intro">项目介绍</a>
+            <a href="#install">安装指南</a>
+            <a href="#usage">使用教程</a>
+            <a href="#config">配置说明</a>
+            <a href="#faq">常见问题</a>
+        </nav>
+        
+        <section id="intro">
+            <h2>项目介绍</h2>
+            <p>PDF OCR Web 是一个功能强大的 PDF OCR 处理工具，具有以下特性：</p>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">text_fields</span> OCR 文字识别</h4>
+                <p>支持中英文混合识别，使用 LSTM 神经网络引擎，识别准确率高。</p>
+            </div>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">auto_awesome</span> LLM 大纲生成</h4>
+                <p>集成大语言模型，自动分析文档内容生成目录大纲，支持嵌入到 PDF。</p>
+            </div>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">cloud_upload</span> 批量处理</h4>
+                <p>支持多文件批量上传和处理，自动排队处理任务。</p>
+            </div>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">dark_mode</span> 深色模式</h4>
+                <p>支持亮色/深色主题切换，保护您的眼睛。</p>
+            </div>
+        </section>
+        
+        <section id="install">
+            <h2>安装指南</h2>
+            
+            <h3>系统要求</h3>
+            <ul>
+                <li>Python 3.10 或更高版本</li>
+                <li>Tesseract OCR（包含中文语言包）</li>
+                <li>Ghostscript（可选，用于高级图像处理）</li>
+            </ul>
+            
+            <h3>Windows 安装</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-content">
+                        <h4>安装 Tesseract OCR</h4>
+                        <p>从 <a href="https://github.com/UB-Mannheim/tesseract/wiki" target="_blank">UB Mannheim</a> 下载安装程序，安装时选择中文语言包（chi_sim）。</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4>运行启动脚本</h4>
+                        <p>双击 <code>start.bat</code> 文件，脚本会自动安装依赖并启动服务。</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4>访问应用</h4>
+                        <p>浏览器会自动打开 <code>http://localhost:8080</code>，如果没有自动打开，请手动访问。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Linux/macOS 安装</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-content">
+                        <h4>安装 Tesseract</h4>
+                        <pre><code># Ubuntu/Debian
+sudo apt install tesseract-ocr tesseract-ocr-chi-sim
+
+# macOS
+brew install tesseract tesseract-lang</code></pre>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4>运行启动脚本</h4>
+                        <pre><code>chmod +x start.sh
+./start.sh</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning">
+                <strong>注意：</strong> 如果 Tesseract 未添加到系统 PATH，需要在 <code>config.py</code> 中指定路径。
+            </div>
+        </section>
+        
+        <section id="usage">
+            <h2>使用教程</h2>
+            
+            <h3>上传文件</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-content">
+                        <h4>选择文件</h4>
+                        <p>点击上传区域选择 PDF 文件，或直接拖拽文件到上传区域。支持多文件批量上传。</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4>配置选项</h4>
+                        <p>在弹出的对话框中配置处理选项：
+                        <ul>
+                            <li><strong>生成大纲</strong> - 使用 LLM 自动生成文档大纲</li>
+                            <li><strong>大纲生成模式</strong> - 自动总结或读取目录页</li>
+                            <li><strong>嵌入大纲到 PDF</strong> - 将大纲嵌入到 PDF 书签</li>
+                        </ul>
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4>开始处理</h4>
+                        <p>点击"确认上传"按钮，文件会自动加入处理队列。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>下载结果</h3>
+            <p>处理完成后，任务卡片会显示两个下载按钮：</p>
+            <ul>
+                <li><strong>PDF</strong> - 下载 OCR 处理后的 PDF 文件（包含文本层）</li>
+                <li><strong>文本</strong> - 下载清理后的纯文本文件（无多余空格）</li>
+            </ul>
+            
+            <h3>批量操作</h3>
+            <p>使用任务列表上方的复选框选择多个任务，然后使用批量操作按钮：</p>
+            <ul>
+                <li><strong>批量下载</strong> - 下载所有已完成的任务（打包为 ZIP）</li>
+                <li><strong>批量删除</strong> - 删除选中的任务</li>
+            </ul>
+        </section>
+        
+        <section id="config">
+            <h2>配置说明</h2>
+            
+            <h3>LLM 配置</h3>
+            <p>点击右上角设置按钮，配置以下信息：</p>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">key</span> API Key</h4>
+                <p>LLM API 密钥，支持 OpenAI、DeepSeek 等兼容接口。</p>
+            </div>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">link</span> Base URL</h4>
+                <p>API 基础地址，例如：
+                <ul>
+                    <li>DeepSeek: <code>https://api.deepseek.com/v1</code></li>
+                    <li>OpenAI: <code>https://api.openai.com/v1</code></li>
+                    <li>本地部署: <code>http://localhost:11434/v1</code></li>
+                </ul>
+                </p>
+            </div>
+            
+            <div class="card">
+                <h4><span class="material-icons-round">smart_toy</span> 模型</h4>
+                <p>使用的模型名称，例如 <code>deepseek-chat</code>、<code>gpt-4</code> 等。</p>
+            </div>
+            
+            <h3>存储管理</h3>
+            <p>在设置页面可以查看存储信息并清理文件：</p>
+            <ul>
+                <li><strong>清理过期文件</strong> - 删除超过 30 分钟的文件</li>
+                <li><strong>清理全部文件</strong> - 删除所有上传和输出的文件</li>
+            </ul>
+            
+            <div class="tip">
+                <strong>提示：</strong> 系统会每 30 分钟自动清理超过 30 分钟的文件。
+            </div>
+        </section>
+        
+        <section id="faq">
+            <h2>常见问题</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="material-icons-round">help</span>
+                    OCR 识别率不高怎么办？
+                </div>
+                <p>请确保已安装中文语言包（chi_sim）。对于扫描质量较差的 PDF，可以尝试提高 DPI 设置或使用更高质量的扫描件。</p>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="material-icons-round">help</span>
+                    处理速度很慢怎么办？
+                </div>
+                <p>OCR 处理是 CPU 密集型任务，处理时间取决于 PDF 页数和图像质量。建议分批处理大型文档。</p>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="material-icons-round">help</span>
+                    如何在另一台电脑使用？
+                </div>
+                <p>复制整个项目文件夹到新电脑，确保安装了 Python 和 Tesseract，然后运行启动脚本即可。</p>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="material-icons-round">help</span>
+                    支持哪些文件格式？
+                </div>
+                <p>目前仅支持 PDF 文件。图片文件需要先转换为 PDF 格式。</p>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="material-icons-round">help</span>
+                    中文之间有多余空格？
+                </div>
+                <p>下载文本文件可以获得清理后的版本，中文字符间的多余空格已被移除。</p>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="material-icons-round">help</span>
+                    如何修改端口？
+                </div>
+                <p>修改启动脚本中的端口号：
+                <pre><code># 后端端口
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
+
+# 前端端口
+python -m http.server 8080</code></pre>
+                同时修改 <code>frontend/app.js</code> 中的 <code>API_BASE</code> 变量。
+                </p>
+            </div>
+        </section>
+        
+        <footer>
+            <p>PDF OCR Web - MIT License</p>
+            <p>如有问题，请访问 <a href="https://github.com" target="_blank">GitHub</a> 提交 Issue</p>
+        </footer>
+    </div>
+    
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                icon.textContent = 'dark_mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                icon.textContent = 'light_mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 加载保存的主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').textContent = 'light_mode';
+        }
+    </script>
+</body>
+</html>

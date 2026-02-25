@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF OCR 处理工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="material-icons-round">document_scanner</span>
+                    <h1>PDF OCR 处理工具</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-button" id="themeToggle" title="切换主题">
+                        <span class="material-icons-round" id="themeIcon">dark_mode</span>
+                    </button>
+                    <button class="icon-button" id="settingsBtn" title="设置">
+                        <span class="material-icons-round">settings</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <span class="material-icons-round">cloud_upload</span>
+                    </div>
+                    <h2>拖拽 PDF 文件到此处</h2>
+                    <p>或点击选择文件</p>
+                    <p class="upload-hint">支持批量上传，单文件最大 500MB</p>
+                    <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+                </div>
+            </section>
+
+            <section class="tasks-section" id="tasksSection">
+                <div class="section-header">
+                    <h2>任务列表</h2>
+                    <div class="batch-actions" id="batchActions">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="selectAll">
+                            <span>全选</span>
+                        </label>
+                        <button class="text-button" id="batchDownloadBtn" disabled>
+                            <span class="material-icons-round">download</span>
+                            批量下载
+                        </button>
+                        <button class="text-button danger" id="batchDeleteBtn" disabled>
+                            <span class="material-icons-round">delete</span>
+                            批量删除
+                        </button>
+                    </div>
+                </div>
+                <div class="tasks-list" id="tasksList">
+                    <div class="empty-state" id="emptyState">
+                        <span class="material-icons-round">inbox</span>
+                        <p>暂无任务</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="task-options-modal hidden" id="taskOptionsModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">任务选项</h3>
+                    <button class="icon-button" id="closeOptionsModal">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="option-group">
+                        <div class="file-list-header">待上传文件：</div>
+                        <div class="file-list" id="fileList"></div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="generateOutline">
+                            <span>生成大纲</span>
+                        </label>
+                    </div>
+                    
+                    <div class="option-group outline-options" id="outlineOptions" style="display: none;">
+                        <div class="option-subgroup">
+                            <label>大纲生成模式</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="outlineMode" value="auto" checked>
+                                    <span>自动总结全文生成大纲</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="outlineMode" value="toc_page">
+                                    <span>读取目录页生成大纲</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="option-subgroup toc-options" id="tocOptions" style="display: none;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="manualTocPages">
+                                <span>手动设置目录页</span>
+                            </label>
+                            <div class="page-range-inputs" id="pageRangeInputs" style="display: none;">
+                                <div class="input-row">
+                                    <div class="input-field">
+                                        <label>目录起始页</label>
+                                        <input type="number" id="tocPageStart" min="1" value="1">
+                                    </div>
+                                    <div class="input-field">
+                                        <label>目录结束页</label>
+                                        <input type="number" id="tocPageEnd" min="1" value="1">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-field">
+                                <label>页码偏移</label>
+                                <input type="number" id="pageOffset" value="0">
+                                <span class="input-hint">目录页码与实际页码的差值</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="embedOutline" checked>
+                            <span>嵌入大纲到 PDF</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="text-button" id="cancelOptions">取消</button>
+                    <button class="filled-button" id="confirmOptions">确认上传</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-modal hidden" id="settingsModal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>设置</h3>
+                    <button class="icon-button" id="closeSettingsModal">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h4>LLM 配置</h4>
+                        <div class="input-field">
+                            <label>API Key</label>
+                            <input type="password" id="apiKey" placeholder="输入 API Key">
+                        </div>
+                        <div class="input-field">
+                            <label>Base URL</label>
+                            <input type="text" id="baseUrl" placeholder="https://api.deepseek.com/v1">
+                        </div>
+                        <div class="input-field">
+                            <label>模型</label>
+                            <input type="text" id="model" placeholder="deepseek-chat">
+                        </div>
+                        <div class="connection-status" id="connectionStatus"></div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h4>存储管理</h4>
+                        <div class="storage-info" id="storageInfo">
+                            <div class="storage-item">
+                                <span class="storage-label">上传目录</span>
+                                <span class="storage-value" id="uploadStorage">-</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-label">输出目录</span>
+                                <span class="storage-value" id="outputStorage">-</span>
+                            </div>
+                            <div class="storage-item total">
+                                <span class="storage-label">总计</span>
+                                <span class="storage-value" id="totalStorage">-</span>
+                            </div>
+                        </div>
+                        <div class="storage-actions">
+                            <button class="outlined-button" id="cleanupOld">
+                                <span class="material-icons-round">cleaning_services</span>
+                                清理过期文件
+                            </button>
+                            <button class="outlined-button danger" id="cleanupAll">
+                                <span class="material-icons-round">delete_sweep</span>
+                                清理全部文件
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="outlined-button" id="testConnection">
+                        <span class="material-icons-round">wifi_find</span>
+                        测试连接
+                    </button>
+                    <button class="filled-button" id="saveSettings">
+                        <span class="material-icons-round">save</span>
+                        保存设置
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="snackbar" id="snackbar">
+            <span class="snackbar-message"></span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
